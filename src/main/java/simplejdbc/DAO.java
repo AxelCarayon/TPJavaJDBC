@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,7 +81,22 @@ public class DAO {
 	 * @throws DAOException
 	 */
 	public int numberOfOrdersForCustomer(int customerId) throws DAOException {
-		throw new UnsupportedOperationException("Pas encore implémenté");
+            
+		String sql = "SELECT COUNT(CUSTOMER_ID) AS NBCOMMANDES FROM PURCHASE_ORDER WHERE CUSTOMER_ID=?";
+		// Syntaxe "try with resources" 
+		// cf. https://stackoverflow.com/questions/22671697/try-try-with-resources-and-connection-statement-and-resultset-closing
+                try (Connection connection = myDataSource.getConnection();
+			PreparedStatement stmt = connection.prepareStatement(sql)) //on prépare le statement 
+                {
+			stmt.setInt(1, customerId); //on met le paramètre 1 avec customerId
+                        ResultSet rs = stmt.executeQuery(); // on crée le ResultSet
+                        rs.next(); // on itère le ResultSet
+                        return rs.getInt("NBCOMMANDES"); //return le résultat
+
+		} catch (SQLException ex) {
+			Logger.getLogger("DAO").log(Level.SEVERE, null, ex);
+			throw new DAOException(ex.getMessage());
+		}
 	}
 
 	/**
@@ -91,7 +107,23 @@ public class DAO {
 	 * @throws DAOException
 	 */
 	CustomerEntity findCustomer(int customerID) throws DAOException {
-		throw new UnsupportedOperationException("Pas encore implémenté");
+            CustomerEntity result = null;
+		String sql = "SELECT * FROM CUSTOMER WHERE CUSTOMER_ID = ?";
+                try (Connection connection = myDataSource.getConnection();
+			PreparedStatement stmt = connection.prepareStatement(sql)) //on prépare le statement 
+                {
+			stmt.setInt(1, customerID); //on met le paramètre 1 avec customerId
+                        ResultSet rs = stmt.executeQuery(); // on crée le ResultSet
+                        while (rs.next()){
+                         String name = rs.getString("NAME");
+                         result = new CustomerEntity(customerID,name,"");
+                        }
+
+		} catch (SQLException ex) {
+			Logger.getLogger("DAO").log(Level.SEVERE, null, ex);
+			throw new DAOException(ex.getMessage());
+		}
+                return result;
 	}
 
 	/**
@@ -102,7 +134,27 @@ public class DAO {
 	 * @throws DAOException
 	 */
 	List<CustomerEntity> customersInState(String state) throws DAOException {
-		throw new UnsupportedOperationException("Pas encore implémenté");
+            List<CustomerEntity> result = new ArrayList();
+		String sql = "SELECT CUSTOMER_ID,NAME, ADDRESSLINE1 FROM CUSTOMER WHERE STATE =?";
+		// Syntaxe "try with resources" 
+		// cf. https://stackoverflow.com/questions/22671697/try-try-with-resources-and-connection-statement-and-resultset-closing
+                try (Connection connection = myDataSource.getConnection();
+			PreparedStatement stmt = connection.prepareStatement(sql)) //on prépare le statement 
+                {
+			stmt.setString(1, state);
+                        ResultSet rs = stmt.executeQuery(); // on crée le ResultSet
+                        while (rs.next()){
+                            int id = rs.getInt("CUSTOMER_ID");
+                            String name = rs.getString("NAME");
+                            String adress = rs.getString("ADDRESSLINE1");
+                            result.add(new CustomerEntity(id,name,adress));
+                        }
+
+		} catch (SQLException ex) {
+			Logger.getLogger("DAO").log(Level.SEVERE, null, ex);
+			throw new DAOException(ex.getMessage());
+		}
+                return result;
 	}
 
 }
