@@ -79,6 +79,8 @@ public class DAOTest {
 	 */
 	@Test @Ignore // Ce test est désactivé, pourquoi ?
 	public void testDeleteCustomerWithoutOrder () throws DAOException {
+            //Ce teste passe mais on le désactive sinon à chaque fois qu'on l'utilise il va
+            //supprimer des éléments dans la BDD ce que l'on veut absolument éviter
 		int id = 25; // Le client 25 n'a pas de bon de commande
 		assertEquals(1, myDAO.deleteCustomer(id));
 	}
